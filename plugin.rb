@@ -83,19 +83,19 @@ SQL
       DistributedMutex.synchronize("discourse_solved_toggle_answer_#{topic.id}") do
         accepted_id = topic.custom_fields["accepted_answer_post_id"].to_i
 
-        if accepted_id > 0
-          if p2 = Post.find_by(id: accepted_id)
-            p2.custom_fields.delete("is_accepted_answer")
-            p2.save!
+        # if accepted_id > 0
+        #   if p2 = Post.find_by(id: accepted_id)
+        #     p2.custom_fields.delete("is_accepted_answer")
+        #     p2.save!
 
-            if defined?(UserAction::SOLVED)
-              UserAction.where(
-                action_type: UserAction::SOLVED,
-                target_post_id: p2.id
-              ).destroy_all
-            end
-          end
-        end
+        #     if defined?(UserAction::SOLVED)
+        #       UserAction.where(
+        #         action_type: UserAction::SOLVED,
+        #         target_post_id: p2.id
+        #       ).destroy_all
+        #     end
+        #   end
+        # end
 
         post.custom_fields["is_accepted_answer"] = "true"
         topic.custom_fields["accepted_answer_post_id"] = post.id
