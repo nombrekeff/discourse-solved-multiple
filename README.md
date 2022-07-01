@@ -30,7 +30,7 @@ Old Categories - Go to that Category > Edit > Settings > Check :white_check_mark
 
 ## BONUS: How to add badges to those who answered correctly
 
-https://meta.discourse.org/t/discourse-solved-accepted-answer-plugin/30155
+https://meta.discourse.org/t/discourse-solved-multiple-accepted-answer-plugin/30155
 
 ## License
 

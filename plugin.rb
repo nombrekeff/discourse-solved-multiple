@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# name: discourse-solved
+# name: discourse-solved-multiple
 # about: Add a solved button to answers on Discourse
 # version: 0.1
 # authors: Sam Saffron
-# url: https://github.com/discourse/discourse-solved
+# url: https://github.com/discourse/discourse-solved-multiple
 # transpile_js: true
 
 enabled_site_setting :solved_enabled
@@ -22,7 +22,7 @@ register_asset 'stylesheets/mobile/solutions.scss', :mobile
 
 after_initialize do
 
-  SeedFu.fixture_paths << Rails.root.join("plugins", "discourse-solved", "db", "fixtures").to_s
+  SeedFu.fixture_paths << Rails.root.join("plugins", "discourse-solved-multiple", "db", "fixtures").to_s
 
   [
     '../app/lib/first_accepted_post_solution_validator.rb',
@@ -630,7 +630,7 @@ SQL
 
       solved_category = DiscourseDev::Record.random(Category.where(read_restricted: false, id: records.pluck(:id), parent_category_id: nil))
       CategoryCustomField.create!(category_id: solved_category.id, name: "enable_accepted_answers", value: "true")
-      puts "discourse-solved enabled on category '#{solved_category.name}' (#{solved_category.id})."
+      puts "discourse-solved-multiple enabled on category '#{solved_category.name}' (#{solved_category.id})."
     elsif type == :topic
       topics = Topic.where(id: records.pluck(:id))
 
