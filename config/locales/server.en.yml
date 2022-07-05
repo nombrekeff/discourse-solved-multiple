@@ -3,6 +3,7 @@ en:
 
   site_settings:
     solved_enabled: "Enable solved plugin, allow users to select solutions for topics"
+    max_solutions: "Max amount of solutions allowed per topic (-1 for infitite)"
     allow_solved_on_all_topics: "Allow users to select solutions on all topics (when unchecked, solutions can be enabled per category or tag)"
     accept_all_solutions_trust_level: "Minimum trust level required to accept solutions on any topic (even when not OP)"
     empty_box_on_unsolved: "Display an empty box next to unsolved topics"

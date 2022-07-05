@@ -3,7 +3,7 @@
 # name: discourse-solved-multiple
 # about: Add a solved button to answers on Discourse
 # version: 0.1
-# authors: Sam Saffron
+# authors: Sam Saffron, Manolo Edge
 # url: https://github.com/discourse/discourse-solved-multiple
 # transpile_js: true
 
@@ -15,7 +15,7 @@ if respond_to?(:register_svg_icon)
   register_svg_icon "far fa-square"
 end
 
-PLUGIN_NAME = "discourse_solved".freeze
+PLUGIN_NAME = "discourse_solved_multiple".freeze
 
 register_asset 'stylesheets/solutions.scss'
 register_asset 'stylesheets/mobile/solutions.scss', :mobile
@@ -81,24 +81,19 @@ SQL
       topic ||= post.topic
 
       DistributedMutex.synchronize("discourse_solved_toggle_answer_#{topic.id}") do
-        accepted_id = topic.custom_fields["accepted_answer_post_id"].to_i
-
-        # if accepted_id > 0
-        #   if p2 = Post.find_by(id: accepted_id)
-        #     p2.custom_fields.delete("is_accepted_answer")
-        #     p2.save!
-
-        #     if defined?(UserAction::SOLVED)
-        #       UserAction.where(
-        #         action_type: UserAction::SOLVED,
-        #         target_post_id: p2.id
-        #       ).destroy_all
-        #     end
-        #   end
-        # end
-
         post.custom_fields["is_accepted_answer"] = "true"
         topic.custom_fields["accepted_answer_post_id"] = post.id
+
+        # Store multiple answer ids
+        if topic.custom_fields["accepted_answer_post_ids"] == nil
+          topic.custom_fields["accepted_answer_post_ids"] = JSON.generate([post.id])
+        else
+          list = JSON.parse(topic.custom_fields["accepted_answer_post_ids"])
+          if !list.include? post.id && (SiteSetting.max_solutions != -1 || list.length < SiteSetting.max_solutions)‚ 
+            list.push(post.id)
+            topic.custom_fields["accepted_answer_post_ids"] = JSON.generate(list)
+          end
+        end
 
         if defined?(UserAction::SOLVED)
           UserAction.log_action!(
@@ -171,6 +166,13 @@ SQL
       DistributedMutex.synchronize("discourse_solved_toggle_answer_#{topic.id}") do
         post.custom_fields.delete("is_accepted_answer")
         topic.custom_fields.delete("accepted_answer_post_id")
+
+        # Remove post.id from accepted_answer_post_ids
+        if topic.custom_fields["accepted_answer_post_ids"] != nil
+          list = JSON.parse(topic.custom_fields["accepted_answer_post_ids"])
+          (i = list.find_index(post.id)) && list.delete_at(i)
+          topic.custom_fields["accepted_answer_post_ids"] = JSON.generate(list)
+        end
 
         if timer_id = topic.custom_fields[AUTO_CLOSE_TOPIC_TIMER_CUSTOM_FIELD]
           topic_timer = TopicTimer.find_by(id: timer_id)
@@ -400,45 +402,39 @@ SQL
 
   require_dependency 'topic_view_serializer'
   class ::TopicViewSerializer
-    attributes :accepted_answer
+    attributes :accepted_answers
 
     def include_accepted_answer?
       accepted_answer_post_id
     end
 
-    def accepted_answer
-      if info = accepted_answer_post_info
-        {
+    def accepted_answers
+      answers = []
+      if infoArray = accepted_answers_post_info
+        infoArray.each { |info| answers.push({
           post_number: info[0],
           username: info[1],
-          excerpt: info[2]
-        }
+          excerpt: info[2],
+        })}
       end
+      answers
     end
 
-    def accepted_answer_post_info
-      # TODO: we may already have it in the stream ... so bypass query here
-      postInfo = Post.where(id: accepted_answer_post_id, topic_id: object.topic.id)
+    def accepted_answers_post_info
+      postInfo = Post.where(id: accepted_answer_post_ids, topic_id: object.topic.id)
         .joins(:user)
         .pluck('post_number', 'username', 'cooked')
-        .first
+ 
+      postInfo
+    end
 
-      if postInfo
-        postInfo[2] = if SiteSetting.solved_quote_length > 0
-          PrettyText.excerpt(postInfo[2], SiteSetting.solved_quote_length, keep_emoji_images: true)
-        else
-          nil
-        end
-        postInfo
+    def accepted_answer_post_ids
+      ids = object.topic.custom_fields["accepted_answer_post_ids"]
+      if ids == nil
+        ids = '[]'
       end
+      JSON.parse(ids)
     end
-
-    def accepted_answer_post_id
-      id = object.topic.custom_fields["accepted_answer_post_id"]
-      # a bit messy but race conditions can give us an array here, avoid
-      id && id.to_i rescue nil
-    end
-
   end
 
   class ::Category

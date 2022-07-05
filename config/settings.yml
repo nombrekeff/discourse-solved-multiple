@@ -8,6 +8,9 @@ plugins:
   accept_all_solutions_trust_level:
     default: 4
     client: true
+  max_solutions:
+    default: -1
+    client: true
   empty_box_on_unsolved:
     default: false
     client: true

@@ -46,7 +46,7 @@ function unacceptPost(post) {
 function acceptPost(post) {
   const topic = post.topic;
 
-  clearAccepted(topic);
+  // clearAccepted(topic);
 
   post.setProperties({
     can_unaccept_answer: true,
