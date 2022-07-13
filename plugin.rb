@@ -89,7 +89,7 @@ SQL
           topic.custom_fields["accepted_answer_post_ids"] = JSON.generate([post.id])
         else
           list = JSON.parse(topic.custom_fields["accepted_answer_post_ids"])
-          if !list.include? post.id && (SiteSetting.max_solutions != -1 || list.length < SiteSetting.max_solutions)‚ 
+          if !list.include? post.id && (SiteSetting.max_solutions != -1 || list.length < SiteSetting.max_solutions) 
             list.push(post.id)
             topic.custom_fields["accepted_answer_post_ids"] = JSON.generate(list)
           end
