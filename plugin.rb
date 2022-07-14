@@ -423,6 +423,7 @@ SQL
           post_number: info[0],
           username: info[1],
           excerpt: info[2],
+          created: info[3],
         })}
       end
       answers
@@ -431,7 +432,7 @@ SQL
     def accepted_answers_post_info
       postInfo = Post.where(id: accepted_answer_post_ids, topic_id: object.topic.id)
         .joins(:user)
-        .pluck('post_number', 'username', 'cooked')
+        .pluck('post_number', 'username', 'cooked', 'created_at')
  
       postInfo
     end
