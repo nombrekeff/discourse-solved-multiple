@@ -6,6 +6,7 @@
 # authors: Sam Saffron, Manolo Edge
 # url: https://github.com/discourse/discourse-solved-multiple
 # transpile_js: true
+require 'json'
 
 enabled_site_setting :solved_enabled
 
@@ -394,7 +395,14 @@ SQL
           id: post.id,
           category_id: post.topic&.category_id,
           tag_ids: post.topic&.tags&.pluck(:id),
-          payload: payload
+          # Adds info about the owner of the topic
+          payload: {
+            post: JSON.parse(payload),
+            owner: {
+              username: post.topic&.user.username,
+              id: post.topic&.user.id,
+            },
+          }.to_json,
         )
       end
     end
