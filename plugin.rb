@@ -424,6 +424,7 @@ SQL
           username: info[1],
           excerpt: PrettyText.excerpt(info[2], 800, keep_emoji_images: true),
           created: info[3],
+          id: info[4],
         })}
       end
       answers
@@ -432,7 +433,7 @@ SQL
     def accepted_answers_post_info
       postInfo = Post.where(id: accepted_answer_post_ids, topic_id: object.topic.id)
         .joins(:user)
-        .pluck('post_number', 'username', 'cooked', 'created_at')
+        .pluck('post_number', 'username', 'cooked', 'created_at', 'id')
  
       postInfo
     end
