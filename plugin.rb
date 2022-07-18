@@ -422,7 +422,7 @@ SQL
         infoArray.each { |info| answers.push({
           post_number: info[0],
           username: info[1],
-          excerpt: PrettyText.excerpt(info[2], 800, keep_emoji_images: true),
+          excerpt: PrettyText.excerpt(info[2], 800, keep_emoji_images: true, strip_links: true),
           created: info[3],
           id: info[4],
         })}
