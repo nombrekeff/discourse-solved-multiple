@@ -90,7 +90,7 @@ SQL
           topic.custom_fields["accepted_answer_post_ids"] = JSON.generate([post.id])
         else
           list = JSON.parse(topic.custom_fields["accepted_answer_post_ids"])
-          if !(list.include? post.id) && (SiteSetting.max_solutions != -1 || list.length < SiteSetting.max_solutions) 
+          if list.exclude? post.id && (SiteSetting.max_solutions != -1 || list.length < SiteSetting.max_solutions) 
             list.push(post.id)
             topic.custom_fields["accepted_answer_post_ids"] = JSON.generate(list)
           end
@@ -215,7 +215,6 @@ SQL
   require_dependency "application_controller"
 
   class DiscourseSolved::AnswerController < ::ApplicationController
-
     def accept
       limit_accepts
 
@@ -419,13 +418,11 @@ SQL
     def accepted_answers
       answers = []
       if infoArray = accepted_answers_post_info
-        infoArray.each do |info|
+        for info in infoArray 
           user = User.find_by(id: info[5])
-
           answers.push({
             post_number: info[0],
             username: info[1],
-            user_id: info[5],
             excerpt: PrettyText.excerpt(info[2], 800, keep_emoji_images: true, strip_links: true),
             created: info[3],
             id: info[4],
@@ -440,7 +437,6 @@ SQL
       postInfo = Post.where(id: accepted_answer_post_ids, topic_id: object.topic.id)
         .joins(:user)
         .pluck('post_number', 'username', 'cooked', 'created_at', 'id', 'user_id')
-
       postInfo
     end
 
